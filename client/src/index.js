@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import {ApolloClient, InMemoryCache, ApolloProvider, gql} from '@apollo/client'
+import {ApolloClient, InMemoryCache, ApolloProvider} from '@apollo/client'
 
 let client = new ApolloClient({
-  uri: 'http://localhost:5000/',
+  uri: 'http://localhost:8080/',
   cache: new InMemoryCache(),
 })
 

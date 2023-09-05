@@ -1,6 +1,26 @@
 import React, { useState } from "react";
+import {useQuery} from "@apollo/client"
+import {Load_login_info} from "../graphQL/Queries"
+
 
 const LoginPage = () => {
+
+  let {error,loading, data } = useQuery(Load_login_info, {
+    variables: { username: "isaac" },
+  });
+  
+  useState(() => {
+    if (loading) {
+     console.log("loading...")
+     alert('loading...')
+    }else if(data){
+       console.log(data)
+       alert("data")
+    }else if(error){
+      console.log`there is an error${error}`
+    }
+  }, [data, loading ,error]);
+  
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
   
