@@ -35,6 +35,9 @@ let typeDefs = gql`
   type Mutation{
     editAddressInfo(tableName:String id:Int firstName:String lastName:String phoneNo:Int dateOfbirth:String address:String):addressInfo
   }
+  type Mutation{
+    deleteAddressInfo(tableName:String id:Int):[addressInfo]
+  }
   `
 //make sure you go through the type definition and then use the logic you used for the express address book for this particular one
 module.exports = typeDefs

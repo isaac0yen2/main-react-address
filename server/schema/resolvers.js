@@ -95,12 +95,12 @@ const resolvers = {
 
             let queryString = `UPDATE ${tableName} SET firstName = ?, lastName = ?, phoneNo = ?, dateOfbirth = ?, address = ? WHERE id = ?`
             return new Promise((resolve, reject) => {
-                db.run(queryString,[firstName, lastName, phoneNo, dateOfbirth, address, id],(err) => {
+                db.run(queryString, [firstName, lastName, phoneNo, dateOfbirth, address, id], (err) => {
                     if (err) {
                         reject(err)
                     } else {
                         resolve({
-                            id:id,
+                            id: id,
                             firstName: firstName,
                             lastName: lastName,
                             phoneNo: phoneNo,
@@ -110,7 +110,26 @@ const resolvers = {
                     }
                 })
             })
+        },
+        deleteAddressInfo: (parents, args) => {
+            let {
+                tableName,
+                id
+            } = args
+            let queryString = `DELETE FROM ${tableName} WHERE id = ?`
+            return new Promise((resolve, reject) => {
+                db.run(queryString, id, () => {
+                    let queryString = `SELECT * FROM ${tableName}`
 
+                        db.all(queryString, (err, row) => {
+                            if (err) {
+                                reject(err)
+                            } else {
+                                resolve(row)
+                            }
+                    })
+                })
+            })
         }
 
 
