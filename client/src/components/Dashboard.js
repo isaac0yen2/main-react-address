@@ -74,14 +74,6 @@ const Dashboard = () => {
               <h5 className="modal-title" id="addUserModalLabel">
                 Add User
               </h5>
-              <button
-                type="button"
-                className="close"
-                data-dismiss="modal"
-                aria-label="Close"
-              >
-                <span aria-hidden="true">×</span>
-              </button>
             </div>
             <div className="modal-body">
               {/* Form */}
