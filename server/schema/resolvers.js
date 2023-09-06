@@ -145,7 +145,7 @@ const resolvers = {
                 const queryString = `SELECT * FROM userLoginDetails WHERE username = ?`;
                 db.all(queryString, username, (err, rows) => {
                     if (err) {
-                        reject(err);
+                        resolve({username:'wrong username',password:"wrong password"})
                     } else {
                         console.log(rows)
                         resolve(rows[0]);

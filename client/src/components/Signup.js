@@ -20,7 +20,7 @@ let Signup = ()=>{
       <h1 className="text-center">Sign up</h1>
 
 
-      <form onSubmit={handleSubmit}>
+      <form >
 
 
         <div className="mb-3">
@@ -68,7 +68,7 @@ let Signup = ()=>{
         </p>
 
 
-        <button type="submit" className="btn btn-primary">Sign up</button>
+        <button onClick={handleSubmit} className="btn btn-primary">Sign up</button>
 
 
 
