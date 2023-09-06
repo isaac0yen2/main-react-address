@@ -32,7 +32,7 @@ const LoginPage = () => {
 
   return (
     <div className="container">
-      {loading && handleSubmit}
+      {loading && <p>Loading...</p>}
       <div className="row">
         <div className="col-md-12">
           <h1 className="text-center">Login</h1>
