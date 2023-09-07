@@ -54,6 +54,7 @@ const resolvers = {
         },
         addAddressInfo: (parents, args) => {
             const {
+                tableName,
                 firstName,
                 lastName,
                 phoneNo,
@@ -64,7 +65,8 @@ const resolvers = {
             return new Promise((resolve, reject) => {
                 db.run(queryString, [firstName, lastName, phoneNo, dateOfBirth, address], (err) => {
                     if (err) {
-                        reject(err);
+                        console.log(err);
+                        console.log(tableName)
                     } else {
                         resolve(args);
                     }

@@ -18,17 +18,18 @@ const Dashboard = () => {
   let modal;
   const handleShowModal = () => {
     if (!modal) {
-      const modalElement = document.querySelector('.modal');
+      let modalElement = document.querySelector('.modal');
       modal = new Modal(modalElement);
     }
     modal.show();
   };
   const handleCloseModal = () => {
-    if (!modal) {
-      const modalElement = document.querySelector('.modal');
-      modal = new Modal(modalElement);
+    if (modal) {
+      modal.hide();
+    } else {
+      modal = new Modal(document.querySelector('.modal'));
+      modal.hide();
     }
-    modal.hide();
   };
   let { loading, error, data } = useQuery(LOAD_TABLE_DATA, {
     variables: { tableName: username },
@@ -43,18 +44,23 @@ console.log(data)
   });
 
   let addUserFunction = async () => {
-
-    console.log((firstName,lastName,phoneNo,dateOfbirth,address),'and the username is ' + username)
-    addAddressInfo({
-            variables: {
-                tableName:username,
-                firstName:firstName,
-                lastName:lastName,
-                phoneNo: +phoneNo,
-                dateOfbirth:dateOfbirth,
-                address:address
-            },
-        });
+    if (username && firstName && lastName && phoneNo && dateOfbirth && address) {
+      let tableName = username
+      console.log((firstName,lastName,phoneNo,dateOfbirth,address),'and the username is ' + username)
+      addAddressInfo({
+              variables: {
+                  tableName:tableName,
+                  firstName:firstName,
+                  lastName:lastName,
+                  phoneNo: +phoneNo,
+                  dateOfbirth:dateOfbirth,
+                  address:address
+              },
+          });
+          handleCloseModal();
+    } else {
+      alert("empty feild located")
+    }
 };
 
   if (loading) return <p>Loading...</p>;
@@ -115,37 +121,35 @@ console.log(data)
                   type="text"
                   placeholder="First Name"
                   onChange={e =>setFirstName(e.target.value)}
+                  required
                 />
                 <input
                   className="form-control mb-2"
                   type="text"
                   placeholder="Last Name"
                   onChange={e =>setLastName(e.target.value)}
+                  required
                 />
                 <input
                   className="form-control mb-2"
                   type="number"
                   placeholder="Phone Number"
                   onChange={e =>setPhoneNo(e.target.value)}
+                  required
                 />
                 <input
                   className="form-control mb-2"
                   type="text"
                   placeholder="Date of Birth"
                   onChange={e =>setdateOfbirth(e.target.value)}
+                  required
                 />
                 <input
                   className="form-control mb-2"
                   type="text"
                   placeholder="Address"
                   onChange={e =>{setAddress(e.target.value)}}
-                />
-                <input
-                  type="text"
-                  name='tableName'
-                  value={username}
-                  hidden
-                  
+                  required
                 />
               </form>
             </div>
