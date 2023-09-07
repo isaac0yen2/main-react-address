@@ -30,31 +30,27 @@ const Dashboard = () => {
     }
     modal.hide();
   };
-  let { loading, error, data } = useQuery(LOAD_TABLE_DATA, {
+  const { loading, error, data } = useQuery(LOAD_TABLE_DATA, {
     variables: { tableName: username },
   });
-  let [addAddressInfo] = useMutation(ADD_USER_INFO, {
-    onCompleted: data => {
-console.log(data)
-    },
-    onError: error => {
-      console.log(JSON.stringify(error,null,2));
-    }
-  });
+  const [addAddressInfo] = useMutation(ADD_USER_INFO);
 
   let addUserFunction = async () => {
-
     console.log((firstName,lastName,phoneNo,dateOfbirth,address),'and the username is ' + username)
-    addAddressInfo({
+    try {
+        await addAddressInfo({
             variables: {
                 tableName:username,
                 firstName:firstName,
                 lastName:lastName,
-                phoneNo: +phoneNo,
+                phoneNo:phoneNo,
                 dateOfbirth:dateOfbirth,
                 address:address
             },
         });
+    } catch (error) {
+        console.error("An error occurred:", error);
+    }
 };
 
   if (loading) return <p>Loading...</p>;

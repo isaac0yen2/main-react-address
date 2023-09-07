@@ -19,6 +19,8 @@ db.run(
 let server = new ApolloServer({
     typeDefs,
     resolvers,
+    status400ForVariableCoercionErrors: true
+
 })
 
 server.listen().then(({url})=>{

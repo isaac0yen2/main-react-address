@@ -53,33 +53,23 @@ const resolvers = {
             });
         },
         addAddressInfo: (parents, args) => {
-            let {
-                tableName,
+            const {
                 firstName,
                 lastName,
                 phoneNo,
-                dateOfbirth,
+                dateOfBirth,
                 address
-            } = args
-            console.log(args)
-
-            let queryString = `INSERT INTO ${tableName} (firstName, lastName, phoneNo, dateOfbirth, address) VALUES (?,?,?,?,?)`
+            } = args;
+            const queryString = `INSERT INTO ${tableName} (firstName, lastName, phoneNo, dateOfBirth, address) VALUES (?,?,?,?,?)`;
             return new Promise((resolve, reject) => {
-                db.run(queryString, [firstName, lastName, phoneNo, dateOfbirth, address], (err) => {
+                db.run(queryString, [firstName, lastName, phoneNo, dateOfBirth, address], (err) => {
                     if (err) {
-                        reject(err)
+                        reject(err);
                     } else {
-                        resolve({
-                            firstName: firstName,
-                            lastName: lastName,
-                            phoneNo: phoneNo,
-                            dateOfbirth: dateOfbirth,
-                            address: address
-                        })
+                        resolve(args);
                     }
-                })
-            })
-
+                });
+            });
         },
         editAddressInfo: (parents, args) => {
             let {
@@ -121,12 +111,12 @@ const resolvers = {
                 db.run(queryString, id, () => {
                     let queryString = `SELECT * FROM ${tableName}`
 
-                        db.all(queryString, (err, row) => {
-                            if (err) {
-                                reject(err)
-                            } else {
-                                resolve(row)
-                            }
+                    db.all(queryString, (err, row) => {
+                        if (err) {
+                            reject(err)
+                        } else {
+                            resolve(row)
+                        }
                     })
                 })
             })
@@ -145,7 +135,10 @@ const resolvers = {
                 const queryString = `SELECT * FROM userLoginDetails WHERE username = ?`;
                 db.all(queryString, username, (err, rows) => {
                     if (err) {
-                        resolve({username:'wrong username',password:"wrong password"})
+                        resolve({
+                            username: 'wrong username',
+                            password: "wrong password"
+                        })
                     } else {
                         console.log(rows)
                         resolve(rows[0]);
