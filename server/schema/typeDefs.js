@@ -15,7 +15,7 @@ let typeDefs = gql`
     id:Int
     firstName:String
     lastName:String
-    phoneNo:Int
+    phoneNo:String
     dateOfbirth:String
     address:String
   }
@@ -30,10 +30,10 @@ let typeDefs = gql`
     getAddressInfo(tableName:String):[addressInfo]
   }
   type Mutation{
-    addAddressInfo(tableName:String firstName:String lastName:String phoneNo:Int dateOfbirth:String address:String):addressInfo
+    addAddressInfo(tableName:String firstName:String lastName:String phoneNo:String dateOfbirth:String address:String):addressInfo
   }
   type Mutation{
-    editAddressInfo(tableName:String id:Int firstName:String lastName:String phoneNo:Int dateOfbirth:String address:String):addressInfo
+    editAddressInfo(tableName:String id:Int firstName:String lastName:String phoneNo:String dateOfbirth:String address:String):addressInfo
   }
   type Mutation{
     deleteAddressInfo(tableName:String id:Int):[addressInfo]

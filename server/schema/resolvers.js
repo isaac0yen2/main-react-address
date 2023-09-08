@@ -21,7 +21,7 @@ const resolvers = {
                 firstName TEXT,
                 lastName TEXT,
                 address TEXT,
-                phoneNo INTEGER,
+                phoneNo TEXT,
                 dateOfbirth TEXT
               )
               `

@@ -1,15 +1,38 @@
 import React, { useState } from "react";
+import { useMutation } from "@apollo/client";
+import  REGISTER_NEW_USER  from "../graphQL/Mutations";
+import { useNavigate } from "react-router-dom";
+
+
+
+
 
 let Signup = ()=>{
     const [username, setUsername] = useState("");
-    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const navigate = useNavigate();
+    let [registrar , {loading, error}] = useMutation(REGISTER_NEW_USER)
+
+
+    let registrationFunction = (username,password)=>{
+
+      registrar({
+        variables:{
+          username: username,
+          password: password
+        }
+      })
+      navigate('/')
+    }
+    
 
     const handleSubmit = (event) => {
       event.preventDefault();
-      console.log(username, email, password);
+      console.log(username, password);
+      registrationFunction(username,password);
     };
-
+    if (loading) return 'loading...'
+    if (error) return error
     return(
         <div className="container">
   <div className="row">
@@ -34,19 +57,6 @@ let Signup = ()=>{
             onChange={(event) => setUsername(event.target.value)}
           />
         </div>
-
-        <div className="mb-3">
-          <label for="Email">Email</label>
-          <input
-            type="email"
-            id="email"
-            placeholder="Enter your email"
-            className="form-control"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-          />
-        </div>
-
 
         <div className="mb-3">
           <label for="password">Password</label>

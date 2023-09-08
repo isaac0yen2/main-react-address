@@ -13,7 +13,6 @@ export let Load_login_info = gql`
 export let LOAD_TABLE_DATA = gql`
 query Query($tableName: String) {
   getAddressInfo(tableName: $tableName) {
-    id
     firstName
     lastName
     phoneNo
