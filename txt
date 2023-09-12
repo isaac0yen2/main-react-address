@@ -172,3 +172,25 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+
+
+
+
+<input
+                  className="form-control mb-2"
+                  type="text"
+                  placeholder="First Name"
+                  onChange={(event) =>{
+                    let last_char = event.target.value.charAt(event.target.value.length - 1)
+                    if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
+                      alert(`Invalid input "${last_char}"`)
+                    } else {
+                      setFirstName(event.target.value)
+                    }
+                  }}
+                  required
+                />
+
+
+EVEN AFTER RESTRICTING THE LAST CHARACTER FROM SHOWING, IT STILL SHOWS...PLEASE CAN YOU HELP ME OUT WITH THE PROBLEM

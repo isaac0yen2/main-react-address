@@ -10,6 +10,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const { setUsername: setGlobalUsername } = useContext(UserContext);
+  const [validation , setvalidation] = useState()
 
   const [getLoginInfo, { loading}] = useLazyQuery(Load_login_info);
   const handleSubmit = async (event) => {
@@ -17,12 +18,13 @@ const LoginPage = () => {
     if (username.length > 0) {
         try {
             const result = await getLoginInfo({ variables: { username } });
-            const data = result.data;
-            if (data && data.getLoginInfo.password === password) {
+            const data = result.data
+            console.log(data.getLoginInfo)
+            if (data.getLoginInfo && data.getLoginInfo.password === password) {
                 setGlobalUsername(username);
                 navigate("/dashboard");
-            }else{
-              alert("Invalid username or password");
+            }else if(data.getLoginInfo == null || data.getLoginInfo.password !== password){
+              setvalidation(true)
             }
         } catch (error) {
             console.log(error)
@@ -34,6 +36,9 @@ const LoginPage = () => {
   return (
     <div className="container">
       {loading && <p>Loading...</p>}
+      {validation&&  <p style={
+        {textAlign:"center",color:"red"}
+      }>Please check your information and try again...</p> }
       <div className="row">
         <div className="col-md-12">
           <h1 className="text-center">Login</h1>
@@ -46,7 +51,10 @@ const LoginPage = () => {
                 placeholder="Enter your username"
                 className="form-control"
                 value={username}
-                onChange={(event) => setUsername(event.target.value)}
+                onChange={(event) =>{
+                  setUsername(event.target.value)
+                  setvalidation(false)
+                }}
                 required
               />
             </div>
@@ -58,22 +66,49 @@ const LoginPage = () => {
                 placeholder="Enter your password"
                 className="form-control"
                 value={password}
-                onChange={(event) => setPassword(event.target.value)}
+                onChange={(event) => {
+                  setPassword(event.target.value)
+                  setvalidation(false)
+                }}
                 required
               />
             </div>
-            <p>
+            {validation ? (
+              <p style={{
+                color:"red"
+              }}>
               Don't have an account?
               <a href="/sign-up" className="p-1">
                 Sign up
               </a>
             </p>
-            <p>
+            ):(
+              <p>
+              Don't have an account?
+              <a href="/sign-up" className="p-1">
+                Sign up
+              </a>
+            </p>
+            )}
+            { validation? (
+              <p style={{
+                color:"red"
+              }}>
               Forgot password?
               <a href="/forgot-password" className="p-1">
                 Forgot password
               </a>
             </p>
+            ):(
+              <p>
+              Forgot password?
+              <a href="/forgot-password" className="p-1">
+                Forgot password
+              </a>
+            </p>
+            )
+
+            }
             <button type="submit" className="btn btn-primary">
               Login
             </button>

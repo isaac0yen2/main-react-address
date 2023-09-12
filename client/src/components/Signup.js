@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useMutation } from "@apollo/client";
-import  REGISTER_NEW_USER  from "../graphQL/Mutations";
+import  {REGISTER_NEW_USER}  from "../graphQL/Mutations";
 import { useNavigate } from "react-router-dom";
 
 
@@ -54,7 +54,16 @@ let Signup = ()=>{
             placeholder="Enter your username"
             className="form-control"
             value={username}
-            onChange={(event) => setUsername(event.target.value)}
+            onChange={(event) =>{
+              let last_char = event.target.value.charAt(event.target.value.length - 1)
+              if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
+                setUsername(event.target.value.slice(0, -1))
+                alert(`Invalid input "${last_char}"`)
+              } else {
+                setUsername(event.target.value)
+              }
+            }         
+            }
           />
         </div>
 
@@ -66,7 +75,16 @@ let Signup = ()=>{
             placeholder="Enter your password"
             className="form-control"
             value={password}
-            onChange={(event) => setPassword(event.target.value)}
+            onChange={(event) =>{
+              let last_char = event.target.value.charAt(event.target.value.length - 1)
+              if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
+                setPassword(event.target.value.slice(0, -1))
+                alert(`Invalid input "${last_char}"`)
+              } else {
+                setPassword(event.target.value)
+              }
+            }         
+            }
           />
         </div>
 

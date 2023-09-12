@@ -1,16 +1,15 @@
 import React, { useState, useContext } from "react";
 import { useQuery } from "@apollo/client";
 import { useMutation } from "@apollo/client";
-import ADD_USER_INFO from "../graphQL/Mutations";
+import {ADD_USER_INFO} from "../graphQL/Mutations";
 import { LOAD_TABLE_DATA } from "../graphQL/Queries";
 import { UserContext } from "../UserContext";
 import { Modal } from "bootstrap";
 import { v4 as uuidv4 } from 'uuid';
+import { useNavigate } from "react-router-dom";
+
 
 const Dashboard = () => {
-
-
-  //Declared all the necessary variables
   const { username } = useContext(UserContext);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -18,12 +17,11 @@ const Dashboard = () => {
   const [dateOfbirth, setdateOfbirth] = useState("");
   const [address, setAddress] = useState("");
   const [dataDisplayed, setDataDisplayed] = useState(null);
+  const navigate = useNavigate();
 
 
 
-  //modal display and dis-appearing function
   let modal;
-  //show modal function
   const handleShowModal = () => {
     if (!modal) {
       let modalElement = document.querySelector(".modal");
@@ -31,7 +29,6 @@ const Dashboard = () => {
     }
     modal.show();
   };
-  //close modal function
   const handleCloseModal = () => {
     if (modal) {
       modal.hide();
@@ -43,11 +40,10 @@ const Dashboard = () => {
 
 
 
-  //query to get the data from the database
 
-  let { loading, error } = useQuery(LOAD_TABLE_DATA, {
+  const { loading, refetch:reload } = useQuery(LOAD_TABLE_DATA, {
     variables: { tableName: username },
-    onCompleted: (data) => { 
+    onCompleted: (data) => {
       console.log(data)
       setDataDisplayed(data)
     },
@@ -58,10 +54,14 @@ const Dashboard = () => {
 
 
 
-  // function used to add a addressFeild to the database
   let [addAddressInfo] = useMutation(ADD_USER_INFO, {
     onCompleted: (data) => {
-      console.log(data);
+      handleSuccess("submitted");
+      console.log(reload())
+      reload().then(  (data)=>{
+        setDataDisplayed(data.data)
+        handleCloseModal()
+      })
     },
     onError: (error) => {
       console.log(JSON.stringify(error, null, 2));
@@ -76,13 +76,6 @@ const Dashboard = () => {
 
 };
 
-
-let handleModal = ()=>{
-  handleShowModal()
-  handleCloseModal()
-}
-
-
   let addUserFunction = async () => {
 
 
@@ -90,11 +83,6 @@ let handleModal = ()=>{
     if (
       username && firstName && lastName && phoneNo && dateOfbirth && address
     ) {
-
-
-
-      handleSuccess("submitted");
-
       let tableName = username;
       console.log(
         firstName, lastName, typeof(phoneNo), dateOfbirth, address,
@@ -110,14 +98,6 @@ let handleModal = ()=>{
           address: address,
         },
       });
-
-      let newInstance = dataDisplayed
-      console.log(newInstance)
-      newInstance.getAddressInfo.concat([{firstName:firstName,lastName:lastName,phoneNo:phoneNo,dateOfbirth:dateOfbirth,address:address}])
-      setDataDisplayed(newInstance)
-
-      handleModal()
-
     } else {
 
       alert("empty feild located");
@@ -125,9 +105,11 @@ let handleModal = ()=>{
     }
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error...</p>;
+  let navigateHandler = ()=>{
+    navigate('/')
+  }
 
+  if (loading) return <p>Loading...</p>;
   return (
 
 
@@ -136,31 +118,40 @@ let handleModal = ()=>{
 
 
 
-      <h1>Dashboard</h1>
+      <h1>WELCOME {username.toUpperCase()}</h1>
+      {dataDisplayed && dataDisplayed.getAddressInfo && dataDisplayed.getAddressInfo.length > 0 ? (
+  <table className="table">
+    <thead>
+      <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Phone Number</th>
+        <th>Date of Birth</th>
+        <th>Address</th>
+      </tr>
+    </thead>
+    <tbody>
+    {dataDisplayed.getAddressInfo.map((item) => (
+  <tr key={uuidv4()}>
+    <td key={uuidv4()}>{item.firstName}</td>
+    <td key={uuidv4()}>{item.lastName}</td>
+    <td key={uuidv4()}>{item.phoneNo}</td>
+    <td key={uuidv4()}>{item.dateOfbirth}</td>
+    <td key={uuidv4()}>{item.address}</td>
+    <td>
+      <button className="btn btn-primary mr-2">Edit</button>
+      <button className="btn btn-danger">Delete</button>
+    </td>
+  </tr>
+))}
 
+    </tbody>
+  </table>
+) : (
+  <h2>no data inputed</h2>
+)}
 
-      <table className="table">
-        <thead>
-          <tr>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Phone Number</th>
-            <th>Date of Birth</th>
-            <th>Address</th>
-          </tr>
-        </thead>
-        <tbody>
-          {dataDisplayed && dataDisplayed.getAddressInfo.map((item) => (
-            <tr key={uuidv4()}>
-              <td key={uuidv4()}>{item.firstName}</td>
-              <td key={uuidv4()}>{item.lastName}</td>
-              <td key={uuidv4()}>{item.phoneNo}</td>
-              <td key={uuidv4()}>{item.dateOfbirth}</td>
-              <td key={uuidv4()}>{item.address}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      
 
 
 
@@ -168,6 +159,9 @@ let handleModal = ()=>{
 
       <button className="btn btn-primary" onClick={handleShowModal}>
         Add User
+      </button>
+      <button className="btn btn-primary" onClick={navigateHandler}>
+        Log out
       </button>
 
 
@@ -190,41 +184,75 @@ let handleModal = ()=>{
             <div className="modal-body">
               {/* Form */}
               <form className="form">
-                <input
-                  className="form-control mb-2"
-                  type="text"
-                  placeholder="First Name"
-                  onChange={(e) => setFirstName(e.target.value)}
-                  required
-                />
+                        <input
+            className="form-control mb-2"
+            type="text"
+            placeholder="First Name"
+            onKeyPress={(event) => {
+              let last_char = event.key;
+              if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
+                alert(`Invalid input "${last_char}"`);
+                event.preventDefault();
+              }
+            }}
+            onChange={(event) => setFirstName(event.target.value)}
+            required
+          />
+
                 <input
                   className="form-control mb-2"
                   type="text"
                   placeholder="Last Name"
-                  onChange={(e) => setLastName(e.target.value)}
+                  onKeyPress={(event) => {
+                    let last_char = event.key;
+                    if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
+                      alert(`Invalid input "${last_char}"`);
+                      event.preventDefault();
+                    }
+                  }}
+                  onChange={(event) => setLastName(event.target.value)}
                   required
                 />
                 <input
                   className="form-control mb-2"
                   type="number"
                   placeholder="Phone Number"
-                  onChange={(e) => setPhoneNo(e.target.value)}
+                  onKeyPress={(event) => {
+                    let last_char = event.key;
+                    if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
+                      alert(`Invalid input "${last_char}"`);
+                      event.preventDefault();
+                    }
+                  }}
+                  onChange={(event) => setPhoneNo(event.target.value)}
                   required
                 />
                 <input
                   className="form-control mb-2"
                   type="text"
                   placeholder="Date of Birth"
-                  onChange={(e) => setdateOfbirth(e.target.value)}
+                  onKeyPress={(event) => {
+                    let last_char = event.key;
+                    if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
+                      alert(`Invalid input "${last_char}"`);
+                      event.preventDefault();
+                    }
+                  }}
+                  onChange={(event) => setdateOfbirth(event.target.value)}
                   required
                 />
                 <input
                   className="form-control mb-2"
                   type="text"
                   placeholder="Address"
-                  onChange={(e) => {
-                    setAddress(e.target.value);
+                  onKeyPress={(event) => {
+                    let last_char = event.key;
+                    if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
+                      alert(`Invalid input "${last_char}"`);
+                      event.preventDefault();
+                    }
                   }}
+                  onChange={(event) => setAddress(event.target.value)}
                   required
                 />
               </form>
