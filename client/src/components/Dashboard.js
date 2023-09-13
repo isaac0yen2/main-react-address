@@ -19,12 +19,28 @@ const Dashboard = () => {
   const [dataDisplayed, setDataDisplayed] = useState(null);
   const navigate = useNavigate();
 
-
-
+  let resetValue = () => {
+    setFirstName("");
+    setLastName("");
+    setPhoneNo("");
+    setdateOfbirth("");
+    setAddress("");
+    console.log(
+      firstName,
+      lastName,
+      phoneNo,
+      dateOfbirth,
+      address + " are the new data"
+    );
+  };
+  
   let modal;
   const handleShowModal = () => {
     if (!modal) {
-      let modalElement = document.querySelector(".modal");
+      let modalElement = document.querySelector(".main");
+      modal = new Modal(modalElement);
+    }else{
+      let modalElement = document.querySelector(".main");
       modal = new Modal(modalElement);
     }
     modal.show();
@@ -33,14 +49,32 @@ const Dashboard = () => {
     if (modal) {
       modal.hide();
     } else {
-      modal = new Modal(document.querySelector(".modal"));
+      modal = new Modal(document.querySelector(".show"));
       modal.hide();
     }
   };
+  let subModal
+  const subhandleShowModal = (indetifier) => {
+    if (!subModal) {
+      let modalElement = document.querySelector(`.${indetifier}`);
+      subModal = new Modal(modalElement);
+    }else{
+      let modalElement = document.querySelector(`.${indetifier}`);
+      subModal = new Modal(modalElement);
+    }
+    subModal.show();
+  };
+  const subhandleCloseModal = () => {
+    if (subModal) {
+      subModal.hide();
+    } else {
+      subModal = new Modal(document.querySelector());
+      subModal.hide();
+    }
+  };
 
-
-
-
+  
+  
   const { loading, refetch:reload } = useQuery(LOAD_TABLE_DATA, {
     variables: { tableName: username },
     onCompleted: (data) => {
@@ -98,6 +132,7 @@ const Dashboard = () => {
           address: address,
         },
       });
+      resetValue()
     } else {
 
       alert("empty feild located");
@@ -132,6 +167,119 @@ const Dashboard = () => {
     </thead>
     <tbody>
     {dataDisplayed.getAddressInfo.map((item) => (
+<>
+     
+            <div
+        className={`modal fade sub ${item.firstName}`}
+        tabIndex="-1"
+        role="dialog"
+        aria-labelledby="addUserModalLabel"
+        aria-hidden="true"
+      >
+      <div className="modal-dialog" role="document">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title" id="addUserModalLabel">
+                    
+                  <form className="form">
+                        <input
+            className="form-control mb-2"
+            type="text"
+            placeholder="First Name"
+            onKeyPress={(event) => {
+              let last_char = event.key;
+              if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
+                alert(`Invalid input "${last_char}"`);
+                event.preventDefault();
+              }
+            }}
+            onChange={(event) => setFirstName(event.target.value)}
+            required
+            value={
+              firstName.length === 0 ? (item.firstName):firstName
+            }
+          />
+
+                <input
+                  className="form-control mb-2"
+                  type="text"
+                  placeholder="Last Name"
+                  onKeyPress={(event) => {
+                    let last_char = event.key;
+                    if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
+                      alert(`Invalid input "${last_char}"`);
+                      event.preventDefault();
+                    }
+                  }}
+                  onChange={(event) => setLastName(event.target.value)}
+                  required
+                  value={
+                    lastName.length === 0 ? (item.lastName):lastName
+                  }
+                />
+                <input
+                  className="form-control mb-2"
+                  type="number"
+                  placeholder="Phone Number"
+                  onKeyPress={(event) => {
+                    let last_char = event.key;
+                    if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
+                      alert(`Invalid input "${last_char}"`);
+                      event.preventDefault();
+                    }
+                  }}
+                  onChange={(event) => setPhoneNo(event.target.value)}
+                  required
+                  value={
+                    phoneNo.length === 0 ? (item.phoneNo):phoneNo
+                  }
+                  />
+                <input
+                  className="form-control mb-2"
+                  type="text"
+                  placeholder="Date of Birth"
+                  onKeyPress={(event) => {
+                    let last_char = event.key;
+                    if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
+                      alert(`Invalid input "${last_char}"`);
+                      event.preventDefault();
+                    }
+                  }}
+                  onChange={(event) => setdateOfbirth(event.target.value)}
+                  required
+                  value={
+                    dateOfbirth.length === 0 ? (item.dateOfbirth):dateOfbirth
+                  }                />
+                <input
+                  className="form-control mb-2"
+                  type="text"
+                  placeholder="Address"
+                  onKeyPress={(event) => {
+                    let last_char = event.key;
+                    if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
+                      alert(`Invalid input "${last_char}"`);
+                      event.preventDefault();
+                    }
+                  }}
+                  onChange={(event) => setAddress(event.target.value)}
+                  required
+                  value={
+                    address.length === 0 ? (item.address):address
+                  }  
+                      />
+              </form>
+
+
+
+                    <button className="btn btn-danger" onClick={subhandleCloseModal}>ADD USER</button>
+
+                  </h5>
+                </div>
+                </div>
+                </div> 
+                </div>
+
+
   <tr key={uuidv4()}>
     <td key={uuidv4()}>{item.firstName}</td>
     <td key={uuidv4()}>{item.lastName}</td>
@@ -139,10 +287,14 @@ const Dashboard = () => {
     <td key={uuidv4()}>{item.dateOfbirth}</td>
     <td key={uuidv4()}>{item.address}</td>
     <td>
-      <button className="btn btn-primary mr-2">Edit</button>
+      <button className="btn btn-primary mr-2" onClick={()=>{
+        subhandleShowModal(item.firstName)
+      }}>Edit</button>
       <button className="btn btn-danger">Delete</button>
     </td>
   </tr>
+  
+</>
 ))}
 
     </tbody>
@@ -168,7 +320,7 @@ const Dashboard = () => {
 
       {/* Modal */}
       <div
-        className={"modal fade"}
+        className={"modal fade main"}
         tabIndex="-1"
         role="dialog"
         aria-labelledby="addUserModalLabel"
@@ -197,6 +349,7 @@ const Dashboard = () => {
             }}
             onChange={(event) => setFirstName(event.target.value)}
             required
+            value={firstName}
           />
 
                 <input
@@ -212,6 +365,7 @@ const Dashboard = () => {
                   }}
                   onChange={(event) => setLastName(event.target.value)}
                   required
+                  value={lastName}
                 />
                 <input
                   className="form-control mb-2"
@@ -226,6 +380,7 @@ const Dashboard = () => {
                   }}
                   onChange={(event) => setPhoneNo(event.target.value)}
                   required
+                  value={phoneNo}
                 />
                 <input
                   className="form-control mb-2"
@@ -240,6 +395,7 @@ const Dashboard = () => {
                   }}
                   onChange={(event) => setdateOfbirth(event.target.value)}
                   required
+                  value={dateOfbirth}
                 />
                 <input
                   className="form-control mb-2"
@@ -254,6 +410,7 @@ const Dashboard = () => {
                   }}
                   onChange={(event) => setAddress(event.target.value)}
                   required
+                  value={address}
                 />
               </form>
             </div>
