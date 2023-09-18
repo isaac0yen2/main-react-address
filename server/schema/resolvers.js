@@ -58,12 +58,12 @@ const resolvers = {
                 firstName,
                 lastName,
                 phoneNo,
-                dateOfBirth,
+                dateOfbirth,
                 address
             } = args;
             const queryString = `INSERT INTO ${tableName} (firstName, lastName, phoneNo, dateOfBirth, address) VALUES (?,?,?,?,?)`;
             return new Promise((resolve, reject) => {
-                db.run(queryString, [firstName, lastName, phoneNo, dateOfBirth, address], (err) => {
+                db.run(queryString, [firstName, lastName, phoneNo, dateOfbirth, address], (err) => {
                     //there's a chance the bug is coming from here.....|||||
                     if (err) {
                         console.log(err);

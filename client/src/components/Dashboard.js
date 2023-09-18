@@ -1,7 +1,7 @@
 import React, { useState, useContext, useRef } from "react";
 import { useQuery } from "@apollo/client";
 import { useMutation } from "@apollo/client";
-import { ADD_USER_INFO } from "../graphQL/Mutations";
+import { ADD_USER_INFO, DELETE_USER_INFO } from "../graphQL/Mutations";
 import { LOAD_TABLE_DATA } from "../graphQL/Queries";
 import { UserContext } from "../UserContext";
 import { Modal } from "bootstrap";
@@ -13,13 +13,12 @@ const Dashboard = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phoneNo, setPhoneNo] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("asdfghjkl");
   const [address, setAddress] = useState("");
-  const [id, setId] = useState(null); // Initialize id as null
+  const [id, setId] = useState(null)
   const [dataDisplayed, setDataDisplayed] = useState(null);
   const navigate = useNavigate();
 
-  // Create refs for input fields in the edit sub-modal
   const updateFirstNameRef = useRef();
   const updateLastNameRef = useRef();
   const updatePhoneNoRef = useRef();
@@ -124,6 +123,19 @@ const Dashboard = () => {
     },
   });
 
+  // Define your DELETE_USER_INFO mutation
+  let [deleteAddressInfo] = useMutation(DELETE_USER_INFO, {
+    onCompleted: (data) => {
+      handleSuccess("Deleted");
+      reload().then((data) => {
+        setDataDisplayed(data.data);
+      });
+    },
+    onError: (error) => {
+      console.log(JSON.stringify(error, null, 2));
+    },
+  });
+
   let handleSuccess = (message) => {
     alert(message);
   };
@@ -147,7 +159,7 @@ const Dashboard = () => {
             tableName: tableName,
             firstName: firstName,
             lastName: lastName,
-            dateOfBirth: dateOfBirth,
+            dateOfbirth: dateOfBirth,
             phoneNo: phoneNo.toString(),
             address: address,
           },
@@ -201,6 +213,16 @@ const Dashboard = () => {
     resetValue();
   };
 
+  // Function to handle deleting a user
+  let handleDeleteUser = (itemId) => {
+    deleteAddressInfo({
+      variables: {
+        tableName: username,
+        id: itemId,
+      },
+    });
+  };
+
   let navigateHandler = () => {
     navigate("/");
   };
@@ -213,7 +235,6 @@ const Dashboard = () => {
         <table className="table">
           <thead>
             <tr>
-              <th>id</th>
               <th>First Name</th>
               <th>Last Name</th>
               <th>Phone Number</th>
@@ -224,19 +245,34 @@ const Dashboard = () => {
           <tbody>
             {dataDisplayed.getAddressInfo.map((item) => (
               <tr key={item.id}>
-                <td>{item.id}</td>
                 <td>{item.firstName}</td>
                 <td>{item.lastName}</td>
                 <td>{item.phoneNo}</td>
                 <td>{item.dateOfBirth}</td>
                 <td>{item.address}</td>
                 <td>
-                  <button className="btn btn-primary mr-2" onClick={() => {
-                    subhandleShowModal(item.firstName, item.lastName, item.phoneNo, item.dateOfBirth, item.address)
-                  }}>
+                  <button
+                    className="btn btn-primary mr-2"
+                    onClick={() => {
+                      subhandleShowModal(
+                        item.firstName,
+                        item.lastName,
+                        item.phoneNo,
+                        item.dateOfBirth,
+                        item.address
+                      );
+                      setId(item.id);
+                    }}
+                  >
                     Edit
                   </button>
-                  <button className="btn btn-danger">Delete</button>
+                  {/* Delete Button */}
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => handleDeleteUser(item.id)}
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}
@@ -246,9 +282,7 @@ const Dashboard = () => {
         <h2>no data inputed</h2>
       )}
 
-      <button className="btn btn-primary" onClick={() => {
-        handleShowModal()
-      }}>
+      <button className="btn btn-primary" onClick={() => handleShowModal()}>
         Add User
       </button>
       <button className="btn btn-primary" onClick={navigateHandler}>
@@ -374,7 +408,14 @@ const Dashboard = () => {
         dataDisplayed.getAddressInfo &&
         dataDisplayed.getAddressInfo.length > 0 &&
         dataDisplayed.getAddressInfo.map((item) => (
-          <div className={`modal fade sub ${item.firstName}`} key={item.id} tabIndex="-1" role="dialog" aria-labelledby="addUserModalLabel" aria-hidden="true">
+          <div
+            className={`modal fade sub ${item.firstName}`}
+            key={item.id}
+            tabIndex="-1"
+            role="dialog"
+            aria-labelledby="addUserModalLabel"
+            aria-hidden="true"
+          >
             <div className="modal-dialog" role="document">
               <div className="modal-content">
                 <div className="modal-header">
@@ -397,7 +438,6 @@ const Dashboard = () => {
                         }
                       }}
                       onChange={(event) => {
-                        
                         setFirstName(event.target.value);
                       }}
                       required
@@ -418,7 +458,6 @@ const Dashboard = () => {
                       }}
                       onChange={(event) => {
                         setLastName(event.target.value);
-                        
                       }}
                       required
                       value={lastName.length === 0 ? item.lastName : lastName}
@@ -437,7 +476,6 @@ const Dashboard = () => {
                       }}
                       onChange={(event) => {
                         setPhoneNo(event.target.value);
-                        
                       }}
                       required
                       value={phoneNo.length === 0 ? item.phoneNo : phoneNo}
@@ -456,7 +494,6 @@ const Dashboard = () => {
                       }}
                       onChange={(event) => {
                         setDateOfBirth(event.target.value);
-                        
                       }}
                       required
                       value={dateOfBirth ? item.dateOfBirth : dateOfBirth}
@@ -475,7 +512,6 @@ const Dashboard = () => {
                       }}
                       onChange={(event) => {
                         setAddress(event.target.value);
-                        
                       }}
                       required
                       value={address.length === 0 ? item.address : address}
@@ -497,11 +533,11 @@ const Dashboard = () => {
                   <button
                     type="button"
                     className="btn btn-secondary"
-                    onClick={(firstName)=>{
-                      subhandleCloseModal(item.firstName)
+                    onClick={() => {
+                      subhandleCloseModal(item.firstName);
                     }}
                   >
-                    Closee
+                    Close
                   </button>
                 </div>
               </div>
