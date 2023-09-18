@@ -1,50 +1,58 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useRef } from "react";
 import { useQuery } from "@apollo/client";
 import { useMutation } from "@apollo/client";
-import {ADD_USER_INFO} from "../graphQL/Mutations";
+import { ADD_USER_INFO } from "../graphQL/Mutations";
 import { LOAD_TABLE_DATA } from "../graphQL/Queries";
 import { UserContext } from "../UserContext";
 import { Modal } from "bootstrap";
-import { v4 as uuidv4 } from 'uuid';
 import { useNavigate } from "react-router-dom";
-
+import { EDIT_CURRENT_FEILD } from "../graphQL/Mutations";
 
 const Dashboard = () => {
   const { username } = useContext(UserContext);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phoneNo, setPhoneNo] = useState("");
-  const [dateOfbirth, setdateOfbirth] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
   const [address, setAddress] = useState("");
+  const [id, setId] = useState(null); // Initialize id as null
   const [dataDisplayed, setDataDisplayed] = useState(null);
   const navigate = useNavigate();
+
+  // Create refs for input fields in the edit sub-modal
+  const updateFirstNameRef = useRef();
+  const updateLastNameRef = useRef();
+  const updatePhoneNoRef = useRef();
+  const updateDateOfBirthRef = useRef();
+  const updateAddressRef = useRef();
 
   let resetValue = () => {
     setFirstName("");
     setLastName("");
     setPhoneNo("");
-    setdateOfbirth("");
+    setDateOfBirth("");
     setAddress("");
     console.log(
       firstName,
       lastName,
       phoneNo,
-      dateOfbirth,
+      dateOfBirth,
       address + " are the new data"
     );
   };
-  
+
   let modal;
   const handleShowModal = () => {
     if (!modal) {
       let modalElement = document.querySelector(".main");
       modal = new Modal(modalElement);
-    }else{
+    } else {
       let modalElement = document.querySelector(".main");
       modal = new Modal(modalElement);
     }
     modal.show();
   };
+
   const handleCloseModal = () => {
     if (modal) {
       modal.hide();
@@ -53,279 +61,202 @@ const Dashboard = () => {
       modal.hide();
     }
   };
-  let subModal
-  const subhandleShowModal = (indetifier) => {
+
+  let subModal;
+  const subhandleShowModal = (firstName, lastName, phoneNo, dateOfBirth, address) => {
     if (!subModal) {
-      let modalElement = document.querySelector(`.${indetifier}`);
+      let modalElement = document.querySelector(`.${firstName}`);
       subModal = new Modal(modalElement);
-    }else{
-      let modalElement = document.querySelector(`.${indetifier}`);
-      subModal = new Modal(modalElement);
+      setFirstName(firstName);
+      setLastName(lastName);
+      setPhoneNo(phoneNo);
+      setDateOfBirth(dateOfBirth);
+      setAddress(address);
+    } else {
+      setFirstName(firstName);
+      setLastName(lastName);
+      setPhoneNo(phoneNo);
+      setDateOfBirth(dateOfBirth);
+      setAddress(address);
     }
     subModal.show();
   };
-  const subhandleCloseModal = () => {
+
+  const subhandleCloseModal = (firstName) => {
     if (subModal) {
       subModal.hide();
     } else {
-      subModal = new Modal(document.querySelector());
+      subModal = new Modal(document.querySelector(`.${firstName}`));
       subModal.hide();
     }
   };
 
-  
-  
-  const { loading, refetch:reload } = useQuery(LOAD_TABLE_DATA, {
+  const { loading, refetch: reload } = useQuery(LOAD_TABLE_DATA, {
     variables: { tableName: username },
     onCompleted: (data) => {
-      console.log(data)
-      setDataDisplayed(data)
+      console.log(data);
+      setDataDisplayed(data);
     },
     onError: (error) => {
       console.log(JSON.stringify(error, null, 2));
     },
   });
-
-
 
   let [addAddressInfo] = useMutation(ADD_USER_INFO, {
     onCompleted: (data) => {
       handleSuccess("submitted");
-      console.log(reload())
-      reload().then(  (data)=>{
-        setDataDisplayed(data.data)
-        handleCloseModal()
-      })
+      reload().then((data) => {
+        setDataDisplayed(data.data);
+        handleCloseModal();
+      });
     },
     onError: (error) => {
       console.log(JSON.stringify(error, null, 2));
     },
   });
 
-
+  let [editAddressInfo] = useMutation(EDIT_CURRENT_FEILD, {
+    onCompleted: (data) => {
+      console.log(data);
+    },
+    onError: (error) => {
+      console.log(`There is an error with the editing ${JSON.stringify(error, null, 2)}`);
+    },
+  });
 
   let handleSuccess = (message) => {
-
-    alert(message);  
-
-};
+    alert(message);
+  };
 
   let addUserFunction = async () => {
-
-
-
-    if (
-      username && firstName && lastName && phoneNo && dateOfbirth && address
-    ) {
+    if (username && firstName && lastName && phoneNo && dateOfBirth && address) {
       let tableName = username;
       console.log(
-        firstName, lastName, typeof(phoneNo), dateOfbirth, address,
+        firstName,
+        lastName,
+        typeof phoneNo,
+        dateOfBirth,
+        address,
         "and the username is " + username
       );
-      addAddressInfo({
-        variables: {
-          tableName: tableName,
-          firstName: firstName,
-          lastName: lastName,
-          phoneNo: phoneNo.toString(),
-          dateOfbirth: dateOfbirth,
-          address: address,
-        },
-      });
-      resetValue()
+      // Before calling the mutation, check if dateOfBirth is a non-empty string
+      if (typeof dateOfBirth === 'string' && dateOfBirth.trim() !== '') {
+        console.log('I got into the function...')
+        addAddressInfo({
+          variables: {
+            tableName: tableName,
+            firstName: firstName,
+            lastName: lastName,
+            dateOfBirth: dateOfBirth,
+            phoneNo: phoneNo.toString(),
+            address: address,
+          },
+        });
+      } else {
+        alert("Date of birth must be a non-empty string");
+      }
+
+      console.log('the date of birth is ' + dateOfBirth)
+      resetValue();
     } else {
-
-      alert("empty feild located");
-
+      alert("empty field located");
     }
   };
 
-  let navigateHandler = ()=>{
-    navigate('/')
-  }
+  let updateUser = () => {
+    // Use the useRef values to update the state
+    const updatedFirstName = updateFirstNameRef.current.value;
+    const updatedLastName = updateLastNameRef.current.value;
+    const updatedPhoneNo = updatePhoneNoRef.current.value;
+    const updatedDateOfBirth = updateDateOfBirthRef.current.value;
+    const updatedAddress = updateAddressRef.current.value;
+
+    // Here, you should use the id state to identify which row you are updating
+    console.log(
+      "Updated values:",
+      id,
+      updatedFirstName,
+      updatedLastName,
+      updatedPhoneNo,
+      updatedDateOfBirth,
+      updatedAddress
+    );
+
+    editAddressInfo({
+      variables: {
+        username: username, // Use the correct variable name
+        id: id,
+        updatedFirstName: updatedFirstName, // Use the correct variable name
+        updatedLastName: updatedLastName, // Use the correct variable name
+        updatedPhoneNo: updatedPhoneNo, // Use the correct variable name
+        updatedDateOfBirth: updatedDateOfBirth, // Use the correct variable name
+        updatedAddress: updatedAddress, // Use the correct variable name
+      },
+    });
+
+    reload().then((data) => {
+      setDataDisplayed(data.data);
+      handleCloseModal();
+    });
+    resetValue();
+  };
+
+  let navigateHandler = () => {
+    navigate("/");
+  };
 
   if (loading) return <p>Loading...</p>;
   return (
-
-
     <div>
-
-
-
-
       <h1>WELCOME {username.toUpperCase()}</h1>
       {dataDisplayed && dataDisplayed.getAddressInfo && dataDisplayed.getAddressInfo.length > 0 ? (
-  <table className="table">
-    <thead>
-      <tr>
-        <th>First Name</th>
-        <th>Last Name</th>
-        <th>Phone Number</th>
-        <th>Date of Birth</th>
-        <th>Address</th>
-      </tr>
-    </thead>
-    <tbody>
-    {dataDisplayed.getAddressInfo.map((item) => (
-<>
-     
-            <div
-        className={`modal fade sub ${item.firstName}`}
-        tabIndex="-1"
-        role="dialog"
-        aria-labelledby="addUserModalLabel"
-        aria-hidden="true"
-      >
-      <div className="modal-dialog" role="document">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title" id="addUserModalLabel">
-                    
-                  <form className="form">
-                        <input
-            className="form-control mb-2"
-            type="text"
-            placeholder="First Name"
-            onKeyPress={(event) => {
-              let last_char = event.key;
-              if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
-                alert(`Invalid input "${last_char}"`);
-                event.preventDefault();
-              }
-            }}
-            onChange={(event) => setFirstName(event.target.value)}
-            required
-            value={
-              firstName.length === 0 ? (item.firstName):firstName
-            }
-          />
+        <table className="table">
+          <thead>
+            <tr>
+              <th>id</th>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Phone Number</th>
+              <th>Date of Birth</th>
+              <th>Address</th>
+            </tr>
+          </thead>
+          <tbody>
+            {dataDisplayed.getAddressInfo.map((item) => (
+              <tr key={item.id}>
+                <td>{item.id}</td>
+                <td>{item.firstName}</td>
+                <td>{item.lastName}</td>
+                <td>{item.phoneNo}</td>
+                <td>{item.dateOfBirth}</td>
+                <td>{item.address}</td>
+                <td>
+                  <button className="btn btn-primary mr-2" onClick={() => {
+                    subhandleShowModal(item.firstName, item.lastName, item.phoneNo, item.dateOfBirth, item.address)
+                  }}>
+                    Edit
+                  </button>
+                  <button className="btn btn-danger">Delete</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <h2>no data inputed</h2>
+      )}
 
-                <input
-                  className="form-control mb-2"
-                  type="text"
-                  placeholder="Last Name"
-                  onKeyPress={(event) => {
-                    let last_char = event.key;
-                    if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
-                      alert(`Invalid input "${last_char}"`);
-                      event.preventDefault();
-                    }
-                  }}
-                  onChange={(event) => setLastName(event.target.value)}
-                  required
-                  value={
-                    lastName.length === 0 ? (item.lastName):lastName
-                  }
-                />
-                <input
-                  className="form-control mb-2"
-                  type="number"
-                  placeholder="Phone Number"
-                  onKeyPress={(event) => {
-                    let last_char = event.key;
-                    if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
-                      alert(`Invalid input "${last_char}"`);
-                      event.preventDefault();
-                    }
-                  }}
-                  onChange={(event) => setPhoneNo(event.target.value)}
-                  required
-                  value={
-                    phoneNo.length === 0 ? (item.phoneNo):phoneNo
-                  }
-                  />
-                <input
-                  className="form-control mb-2"
-                  type="text"
-                  placeholder="Date of Birth"
-                  onKeyPress={(event) => {
-                    let last_char = event.key;
-                    if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
-                      alert(`Invalid input "${last_char}"`);
-                      event.preventDefault();
-                    }
-                  }}
-                  onChange={(event) => setdateOfbirth(event.target.value)}
-                  required
-                  value={
-                    dateOfbirth.length === 0 ? (item.dateOfbirth):dateOfbirth
-                  }                />
-                <input
-                  className="form-control mb-2"
-                  type="text"
-                  placeholder="Address"
-                  onKeyPress={(event) => {
-                    let last_char = event.key;
-                    if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
-                      alert(`Invalid input "${last_char}"`);
-                      event.preventDefault();
-                    }
-                  }}
-                  onChange={(event) => setAddress(event.target.value)}
-                  required
-                  value={
-                    address.length === 0 ? (item.address):address
-                  }  
-                      />
-              </form>
-
-
-
-                    <button className="btn btn-danger" onClick={subhandleCloseModal}>ADD USER</button>
-
-                  </h5>
-                </div>
-                </div>
-                </div> 
-                </div>
-
-
-  <tr key={uuidv4()}>
-    <td key={uuidv4()}>{item.firstName}</td>
-    <td key={uuidv4()}>{item.lastName}</td>
-    <td key={uuidv4()}>{item.phoneNo}</td>
-    <td key={uuidv4()}>{item.dateOfbirth}</td>
-    <td key={uuidv4()}>{item.address}</td>
-    <td>
-      <button className="btn btn-primary mr-2" onClick={()=>{
-        subhandleShowModal(item.firstName)
-      }}>Edit</button>
-      <button className="btn btn-danger">Delete</button>
-    </td>
-  </tr>
-  
-</>
-))}
-
-    </tbody>
-  </table>
-) : (
-  <h2>no data inputed</h2>
-)}
-
-      
-
-
-
-
-
-      <button className="btn btn-primary" onClick={handleShowModal}>
+      <button className="btn btn-primary" onClick={() => {
+        handleShowModal()
+      }}>
         Add User
       </button>
       <button className="btn btn-primary" onClick={navigateHandler}>
         Log out
       </button>
 
-
-
-      {/* Modal */}
-      <div
-        className={"modal fade main"}
-        tabIndex="-1"
-        role="dialog"
-        aria-labelledby="addUserModalLabel"
-        aria-hidden="true"
-      >
+      {/* Main Modal */}
+      <div className={"modal fade main"} tabIndex="-1" role="dialog" aria-labelledby="addUserModalLabel" aria-hidden="true">
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">
@@ -336,21 +267,21 @@ const Dashboard = () => {
             <div className="modal-body">
               {/* Form */}
               <form className="form">
-                        <input
-            className="form-control mb-2"
-            type="text"
-            placeholder="First Name"
-            onKeyPress={(event) => {
-              let last_char = event.key;
-              if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
-                alert(`Invalid input "${last_char}"`);
-                event.preventDefault();
-              }
-            }}
-            onChange={(event) => setFirstName(event.target.value)}
-            required
-            value={firstName}
-          />
+                <input
+                  className="form-control mb-2"
+                  type="text"
+                  placeholder="First Name"
+                  onKeyPress={(event) => {
+                    let last_char = event.key;
+                    if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
+                      alert(`Invalid input "${last_char}"`);
+                      event.preventDefault();
+                    }
+                  }}
+                  onChange={(event) => setFirstName(event.target.value)}
+                  required
+                  value={firstName}
+                />
 
                 <input
                   className="form-control mb-2"
@@ -393,9 +324,9 @@ const Dashboard = () => {
                       event.preventDefault();
                     }
                   }}
-                  onChange={(event) => setdateOfbirth(event.target.value)}
+                  onChange={(event) => setDateOfBirth(event.target.value)}
                   required
-                  value={dateOfbirth}
+                  value={dateOfBirth}
                 />
                 <input
                   className="form-control mb-2"
@@ -428,6 +359,7 @@ const Dashboard = () => {
               <button
                 type="button"
                 className="btn btn-secondary"
+                data-bs-dismiss="modal"
                 onClick={handleCloseModal}
               >
                 Close
@@ -437,20 +369,147 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Edit Sub-Modals */}
+      {dataDisplayed &&
+        dataDisplayed.getAddressInfo &&
+        dataDisplayed.getAddressInfo.length > 0 &&
+        dataDisplayed.getAddressInfo.map((item) => (
+          <div className={`modal fade sub ${item.firstName}`} key={item.id} tabIndex="-1" role="dialog" aria-labelledby="addUserModalLabel" aria-hidden="true">
+            <div className="modal-dialog" role="document">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title" id="addUserModalLabel">
+                    Edit User
+                  </h5>
+                </div>
+                <div className="modal-body">
+                  {/* Form */}
+                  <form className="form">
+                    <input
+                      className="form-control mb-2"
+                      type="text"
+                      placeholder="First Name"
+                      onKeyPress={(event) => {
+                        let last_char = event.key;
+                        if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
+                          alert(`Invalid input "${last_char}"`);
+                          event.preventDefault();
+                        }
+                      }}
+                      onChange={(event) => {
+                        
+                        setFirstName(event.target.value);
+                      }}
+                      required
+                      value={firstName.length === 0 ? item.firstName : firstName}
+                      ref={updateFirstNameRef}
+                    />
 
+                    <input
+                      className="form-control mb-2"
+                      type="text"
+                      placeholder="Last Name"
+                      onKeyPress={(event) => {
+                        let last_char = event.key;
+                        if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
+                          alert(`Invalid input "${last_char}"`);
+                          event.preventDefault();
+                        }
+                      }}
+                      onChange={(event) => {
+                        setLastName(event.target.value);
+                        
+                      }}
+                      required
+                      value={lastName.length === 0 ? item.lastName : lastName}
+                      ref={updateLastNameRef}
+                    />
+                    <input
+                      className="form-control mb-2"
+                      type="number"
+                      placeholder="Phone Number"
+                      onKeyPress={(event) => {
+                        let last_char = event.key;
+                        if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
+                          alert(`Invalid input "${last_char}"`);
+                          event.preventDefault();
+                        }
+                      }}
+                      onChange={(event) => {
+                        setPhoneNo(event.target.value);
+                        
+                      }}
+                      required
+                      value={phoneNo.length === 0 ? item.phoneNo : phoneNo}
+                      ref={updatePhoneNoRef}
+                    />
+                    <input
+                      className="form-control mb-2"
+                      type="text"
+                      placeholder="Date of Birth"
+                      onKeyPress={(event) => {
+                        let last_char = event.key;
+                        if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
+                          alert(`Invalid input "${last_char}"`);
+                          event.preventDefault();
+                        }
+                      }}
+                      onChange={(event) => {
+                        setDateOfBirth(event.target.value);
+                        
+                      }}
+                      required
+                      value={dateOfBirth ? item.dateOfBirth : dateOfBirth}
+                      ref={updateDateOfBirthRef}
+                    />
+                    <input
+                      className="form-control mb-2"
+                      type="text"
+                      placeholder="Address"
+                      onKeyPress={(event) => {
+                        let last_char = event.key;
+                        if (last_char === " " || last_char === "-" || last_char === "!" || last_char === "$" || last_char === "_" || last_char === ".") {
+                          alert(`Invalid input "${last_char}"`);
+                          event.preventDefault();
+                        }
+                      }}
+                      onChange={(event) => {
+                        setAddress(event.target.value);
+                        
+                      }}
+                      required
+                      value={address.length === 0 ? item.address : address}
+                      ref={updateAddressRef}
+                    />
+                  </form>
+                </div>
+                <div className="modal-footer">
+                  {/* Submit Button */}
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={updateUser}
+                  >
+                    Update User
+                  </button>
 
-
-
+                  {/* Close Button */}
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={(firstName)=>{
+                      subhandleCloseModal(item.firstName)
+                    }}
+                  >
+                    Closee
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
     </div>
-
-
-
   );
-
-
-
-
-
 };
 
 export default Dashboard;

@@ -194,3 +194,281 @@ export default Dashboard;
 
 
 EVEN AFTER RESTRICTING THE LAST CHARACTER FROM SHOWING, IT STILL SHOWS...PLEASE CAN YOU HELP ME OUT WITH THE PROBLEM
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useState, useContext, useRef } from "react";
+import { useQuery } from "@apollo/client";
+import { useMutation } from "@apollo/client";
+import { ADD_USER_INFO } from "../graphQL/Mutations";
+import { LOAD_TABLE_DATA } from "../graphQL/Queries";
+import { UserContext } from "../UserContext";
+import { Modal } from "bootstrap";
+import { v4 as uuidv4 } from 'uuid';
+import { useNavigate } from "react-router-dom";
+
+const Dashboard = () => {
+  const { username } = useContext(UserContext);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phoneNo, setPhoneNo] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [address, setAddress] = useState("");
+  const [id, setId] = useState("");
+  const [dataDisplayed, setDataDisplayed] = useState(null);
+  const navigate = useNavigate();
+  const UpdateFirstName = useRef(null);
+  const UpdateLastName = useRef(null);
+  const UpdatePhoneNo = useRef(null);
+  const UpdateDateOfBirth = useRef(null);
+  const UpdateAddress = useRef(null);
+
+  const [modal, setModal] = useState(null);
+  const [subModal, setSubModal] = useState(null);
+
+  const handleShowModal = (modalType) => {
+    const modalElement = document.querySelector(modalType);
+    const modalInstance = new Modal(modalElement);
+    modalInstance.show();
+    if (modalType === ".main") {
+      setModal(modalInstance);
+    } else {
+      setSubModal(modalInstance);
+    }
+  };
+
+  const handleCloseModal = (modalType) => {
+    const modalInstance = modalType === ".main" ? modal : subModal;
+    if (modalInstance) {
+      modalInstance.hide();
+    }
+  };
+
+  const resetValue = () => {
+    setFirstName("");
+    setLastName("");
+    setPhoneNo("");
+    setDateOfBirth("");
+    setAddress("");
+  };
+
+  const { loading, refetch: reload } = useQuery(LOAD_TABLE_DATA, {
+    variables: { tableName: username },
+    onCompleted: (data) => {
+      console.log(data);
+      setDataDisplayed(data);
+    },
+    onError: (error) => {
+      console.log(JSON.stringify(error, null, 2));
+    },
+  });
+
+  const [addAddressInfo] = useMutation(ADD_USER_INFO, {
+    onCompleted: (data) => {
+      handleSuccess("submitted");
+      reload().then((data) => {
+        setDataDisplayed(data.data);
+        handleCloseModal(".main");
+      });
+    },
+    onError: (error) => {
+      console.log(JSON.stringify(error, null, 2));
+    },
+  });
+
+  const handleSuccess = (message) => {
+    alert(message);
+  };
+
+  const addUserFunction = () => {
+    if (username && firstName && lastName && phoneNo && dateOfBirth && address) {
+      const tableName = username;
+      addAddressInfo({
+        variables: {
+          tableName: tableName,
+          firstName: firstName,
+          lastName: lastName,
+          phoneNo: phoneNo.toString(),
+          dateOfbirth: dateOfBirth,
+          address: address,
+        },
+      });
+      resetValue();
+    } else {
+      alert("Empty field located");
+    }
+  };
+
+  const updateUser = (item) => {
+    console.log('Updating User', item);
+    // Implement your update logic here
+    // You can use the values from UpdateFirstName.current.value, UpdateLastName.current.value, etc.
+  };
+
+  const navigateHandler = () => {
+    navigate('/');
+  };
+
+  if (loading) return <p>Loading...</p>;
+  
+  return (
+    <div>
+      <h1>WELCOME {username.toUpperCase()}</h1>
+      {dataDisplayed && dataDisplayed.getAddressInfo && dataDisplayed.getAddressInfo.length > 0 ? (
+        <table className="table">
+          <thead>
+            <tr>
+              <th>id</th>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Phone Number</th>
+              <th>Date of Birth</th>
+              <th>Address</th>
+            </tr>
+          </thead>
+          <tbody>
+            {dataDisplayed.getAddressInfo.map((item) => (
+              <tr key={item.id}>
+                <td>{item.id}</td>
+                <td>{item.firstName}</td>
+                <td>{item.lastName}</td>
+                <td>{item.phoneNo}</td>
+                <td>{item.dateOfbirth}</td>
+                <td>{item.address}</td>
+                <td>
+                  <button
+                    className="btn btn-primary mr-2"
+                    onClick={() => handleShowModal(`.sub.${item.firstName}`)}
+                  >
+                    Edit
+                  </button>
+                  <button className="btn btn-danger">Delete</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <h2>No data inputted</h2>
+      )}
+
+      <button className="btn btn-primary" onClick={() => handleShowModal(".main")}>
+        Add User
+      </button>
+      <button className="btn btn-primary" onClick={navigateHandler}>
+        Log out
+      </button>
+
+      {/* Main Modal */}
+      <div
+        className="modal fade main"
+        tabIndex="-1"
+        role="dialog"
+        aria-labelledby="addUserModalLabel"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="addUserModalLabel">
+                Add User
+              </h5>
+            </div>
+            <div className="modal-body">
+              <form className="form">
+                <input
+                  className="form-control mb-2"
+                  type="text"
+                  placeholder="First Name"
+                  onChange={(event) => setFirstName(event.target.value)}
+                  required
+                  value={firstName}
+                />
+                {/* Other input fields go here */}
+              </form>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={addUserFunction}
+              >
+                Add User
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => handleCloseModal(".main")}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Sub Modals */}
+      {dataDisplayed.getAddressInfo.map((item) => (
+        <div
+          key={`subModal-${item.id}`}
+          className={`modal fade sub ${item.firstName}`}
+          tabIndex="-1"
+          role="dialog"
+          aria-labelledby="editUserModalLabel"
+          aria-hidden="true"
+        >
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title" id="editUserModalLabel">
+                  Edit User
+                </h5>
+              </div>
+              <div className="modal-body">
+                <form className="form">
+                 

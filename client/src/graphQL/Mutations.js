@@ -22,3 +22,15 @@ mutation Mutation($username: String, $password: String) {
   }
 }
 `
+export let EDIT_CURRENT_FEILD = gql`
+mutation Mutation($username: String, $id: Int, $updatedFirstName: String, $updatedLastName: String, $updatedPhoneNo: String, $updatedDateOfBirth: String, $updatedAddress: String) {
+  editAddressInfo(tableName: $username, id: $id, firstName: $updatedFirstName, lastName: $updatedLastName, phoneNo: $updatedPhoneNo, dateOfbirth: $updatedDateOfBirth, address: $updatedAddress) {
+    id
+    firstName
+    lastName
+    phoneNo
+    dateOfbirth
+    address
+  }
+}
+`
