@@ -1,0 +1,9 @@
+ADMIN LOGIC
+delete Database
+the table for loggers should have id username,password, and ADMIN containing true or false
+
+in logging in , the ADMIN cell chould be checked
+and if true should be directed to the admin Dashboard
+the admin dashboard should query the users table and bring out a list of users in the database with the option to delete user
+
+extra functionalities should include being able to see the user's data and how many people are currently using the app

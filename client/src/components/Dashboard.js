@@ -13,7 +13,7 @@ const Dashboard = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phoneNo, setPhoneNo] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("asdfghjkl");
+  const [dateOfbirth, setDateOfBirth] = useState("");
   const [address, setAddress] = useState("");
   const [id, setId] = useState(null)
   const [dataDisplayed, setDataDisplayed] = useState(null);
@@ -35,7 +35,7 @@ const Dashboard = () => {
       firstName,
       lastName,
       phoneNo,
-      dateOfBirth,
+      dateOfbirth,
       address + " are the new data"
     );
   };
@@ -62,20 +62,20 @@ const Dashboard = () => {
   };
 
   let subModal;
-  const subhandleShowModal = (firstName, lastName, phoneNo, dateOfBirth, address) => {
+  const subhandleShowModal = (firstName, lastName, phoneNo, dateOfbirth, address) => {
     if (!subModal) {
       let modalElement = document.querySelector(`.${firstName}`);
       subModal = new Modal(modalElement);
       setFirstName(firstName);
       setLastName(lastName);
       setPhoneNo(phoneNo);
-      setDateOfBirth(dateOfBirth);
+      setDateOfBirth(dateOfbirth);
       setAddress(address);
     } else {
       setFirstName(firstName);
       setLastName(lastName);
       setPhoneNo(phoneNo);
-      setDateOfBirth(dateOfBirth);
+      setDateOfBirth(dateOfbirth);
       setAddress(address);
     }
     subModal.show();
@@ -141,25 +141,25 @@ const Dashboard = () => {
   };
 
   let addUserFunction = async () => {
-    if (username && firstName && lastName && phoneNo && dateOfBirth && address) {
+    if (username && firstName && lastName && phoneNo && dateOfbirth && address) {
       let tableName = username;
       console.log(
         firstName,
         lastName,
         typeof phoneNo,
-        dateOfBirth,
+        dateOfbirth,
         address,
         "and the username is " + username
       );
-      // Before calling the mutation, check if dateOfBirth is a non-empty string
-      if (typeof dateOfBirth === 'string' && dateOfBirth.trim() !== '') {
+      // Before calling the mutation, check if dateOfbirth is a non-empty string
+      if (typeof dateOfbirth === 'string' && dateOfbirth.trim() !== '') {
         console.log('I got into the function...')
         addAddressInfo({
           variables: {
             tableName: tableName,
             firstName: firstName,
             lastName: lastName,
-            dateOfbirth: dateOfBirth,
+            dateOfbirth: dateOfbirth,
             phoneNo: phoneNo.toString(),
             address: address,
           },
@@ -168,7 +168,8 @@ const Dashboard = () => {
         alert("Date of birth must be a non-empty string");
       }
 
-      console.log('the date of birth is ' + dateOfBirth)
+      console.log('the date of birth is ' + dateOfbirth)
+      handleCloseModal();
       resetValue();
     } else {
       alert("empty field located");
@@ -208,9 +209,9 @@ const Dashboard = () => {
 
     reload().then((data) => {
       setDataDisplayed(data.data);
+      resetValue();
       handleCloseModal();
     });
-    resetValue();
   };
 
   // Function to handle deleting a user
@@ -248,7 +249,7 @@ const Dashboard = () => {
                 <td>{item.firstName}</td>
                 <td>{item.lastName}</td>
                 <td>{item.phoneNo}</td>
-                <td>{item.dateOfBirth}</td>
+                <td>{item.dateOfbirth}</td>
                 <td>{item.address}</td>
                 <td>
                   <button
@@ -258,7 +259,7 @@ const Dashboard = () => {
                         item.firstName,
                         item.lastName,
                         item.phoneNo,
-                        item.dateOfBirth,
+                        item.dateOfbirth,
                         item.address
                       );
                       setId(item.id);
@@ -360,7 +361,7 @@ const Dashboard = () => {
                   }}
                   onChange={(event) => setDateOfBirth(event.target.value)}
                   required
-                  value={dateOfBirth}
+                  value={dateOfbirth}
                 />
                 <input
                   className="form-control mb-2"
@@ -496,7 +497,7 @@ const Dashboard = () => {
                         setDateOfBirth(event.target.value);
                       }}
                       required
-                      value={dateOfBirth ? item.dateOfBirth : dateOfBirth}
+                      value={dateOfbirth.length === 0 ? item.dateOfbirth : dateOfbirth}
                       ref={updateDateOfBirthRef}
                     />
                     <input

@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client";
 
 export let ADD_USER_INFO = gql`
-    mutation Mutation($tableName: String, $firstName: String, $lastName: String, $phoneNo: String, $dateOfBirth: String, $address: String) {
-  addAddressInfo(tableName: $tableName, firstName: $firstName, lastName: $lastName, phoneNo: $phoneNo, dateOfbirth: $dateOfBirth, address: $address) {
+    mutation Mutation($tableName: String, $firstName: String, $lastName: String, $phoneNo: String, $dateOfbirth: String, $address: String) {
+  addAddressInfo(tableName: $tableName, firstName: $firstName, lastName: $lastName, phoneNo: $phoneNo, dateOfbirth: $dateOfbirth, address: $address) {
     firstName
     lastName
     phoneNo

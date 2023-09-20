@@ -61,6 +61,7 @@ const resolvers = {
                 dateOfbirth,
                 address
             } = args;
+            console.log(dateOfbirth)
             const queryString = `INSERT INTO ${tableName} (firstName, lastName, phoneNo, dateOfBirth, address) VALUES (?,?,?,?,?)`;
             return new Promise((resolve, reject) => {
                 db.run(queryString, [firstName, lastName, phoneNo, dateOfbirth, address], (err) => {
@@ -70,6 +71,7 @@ const resolvers = {
                         console.log(tableName)
                     } else {
                         resolve(args);
+                        console.log(dateOfbirth)
                     }
                 });
             });
